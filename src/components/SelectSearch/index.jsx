@@ -17,6 +17,7 @@ class SelectSearch extends Component {
             searchValue:"",
             defaultItems:props.items,
             filteredItems:props.items,
+            placeholder:props.placeholder,
             isDropdownOpen:false
         }
     }
@@ -120,6 +121,14 @@ class SelectSearch extends Component {
                             :null
                         }
                     </div>
+                    <div className={
+                        classNames({
+                            "SelectSearch__placeholder":true,
+                            "SelectSearch__placeholder_rolled":this.state.isDropdownOpen || this.state.value.length !== 0
+                        })
+                    }>
+                        {this.state.placeholder}
+                    </div>
                     <input
                         type="text"
                         className={
@@ -177,10 +186,12 @@ SelectSearch.propTypes = {
             value:PropTypes.string,
             name:PropTypes.string
         })
-    )
+    ),
+    placeholder:PropTypes.string
 };
 SelectSearch.defaultProps = {
-    items:[]
+    items:[],
+    placeholder:"Выберите"
 };
 
 

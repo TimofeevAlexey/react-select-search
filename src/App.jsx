@@ -20,6 +20,7 @@ class App extends Component{
                 <div className="App__select-wrapper">
                     <SelectSearch
                         items={items}
+                        placeholder="Выберите страну"
                     />
                 </div>
 
