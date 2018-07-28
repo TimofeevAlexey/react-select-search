@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+//TODO autoprefixer for stylys
+
 const paths = {
     src: path.resolve(__dirname, 'src'),
     dist: path.resolve(__dirname, 'dist')
@@ -28,16 +30,27 @@ const config = {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: ['babel-loader']
+            },
+            {
+                test: /\.(styl)$/,
+                exclude: /node_modules/,
+                use: ['style-loader','css-loader','stylus-loader']
             }
         ]
 
     },
+
     plugins: [
         new CleanWebpackPlugin(['dist']),
         new HtmlWebpackPlugin({
             template: './index.html'
-        })
+        }),
+        new webpack.HotModuleReplacementPlugin(),
     ],
+    devServer: {
+        contentBase: './dist',
+        hot: true
+    }
 
 };
 

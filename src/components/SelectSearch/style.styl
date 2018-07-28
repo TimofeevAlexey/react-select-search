@@ -1,0 +1,88 @@
+.SelectSearch
+  position: relative
+  display: inline-block
+  width:100%
+  font-family:Verdana;
+
+  &__select
+    position: absolute
+    opacity :0
+    top:0
+    width:100%
+    height:33px
+    padding:5px 5px
+    &:focus
+      outline: none
+
+  &__box
+    display: flex
+    justify-content: space-between
+    align-items: center
+    box-sizing: border-box
+    border:1px solid #cccccc
+    border-radius:4px
+    width:100%
+    padding:5px 10px
+    height:33px
+    &_open
+      border-bottom-left-radius:0
+      border-bottom-right-radius:0
+
+  &__value
+    display:none
+    &_active
+      display block
+
+  &__input
+    border:0
+    display :none
+    &_active
+     display block
+    &:focus
+      outline: none
+
+  &__arrow
+    position: relative
+    top: 2px
+    box-sizing: border-box
+    border: 5px solid transparent
+    border-top: 5px solid #a3a6af
+    &_invert
+      border-bottom: 5px solid #a3a6af
+      border-top: 0
+      top: 0
+
+  .dropdown
+    box-sizing border-box
+    border :1px solid #cccccc
+    border-top:0
+    border-radius:4px
+    border-top-left-radius :0
+    border-top-right-radius :0
+    width :100%
+    &__list
+      list-style :none
+      padding:0
+      margin:0
+    &__item
+      padding: 10px 10px
+      cursor: default
+      &:hover,&_active
+        background-color: lightblue
+      &_empty-text
+        color:#ababab
+      span
+        text-decoration: underline
+        color:darkorange
+
+
+  &__dropdown
+    top 33px
+    position absolute
+
+
+
+
+
+
+
