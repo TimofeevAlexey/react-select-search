@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import equal from 'deep-equal';
 import checkBrowser from 'check-browser';
 import enhanceWithClickOutside from 'react-click-outside';
 import classNames from 'classnames';
-import clone from 'clone';
 
 import './style.styl';
 
@@ -15,7 +13,6 @@ class SelectSearch extends Component {
         const items = this.helperSortByName(props.items);
 
         this.state={
-            value:"",
             searchValue:"",
             defaultItems:items,
             filteredItems:items,
@@ -26,15 +23,24 @@ class SelectSearch extends Component {
         }
     }
     static getDerivedStateFromProps(props, state){
-
-       if(props.items !== state.defaultItems){
+       if(
+           props.items !== state.defaultItems
+       ){
            return{
                ...state,
-               defaultItems:this.helperSortByName(props.items)
+               defaultItems:props.items
            }
        }
 
         return null;
+    }
+
+    componentDidUpdate(prevProps, prevState, prevContext) {
+        if(prevState.defaultItems !== this.state.defaultItems){
+            this.setState({
+                filteredItems: this.helperSortByName(this.state.defaultItems)
+            })
+        }
     }
 
     handleClickOutside() {
@@ -43,12 +49,13 @@ class SelectSearch extends Component {
         });
     }
     handleBoxOnClick(e){
-
         this.setState({
             isDropdownOpen:true,
-            value:"",
             isDurationTop: this.helperGetDuration()
-        },()=> this.searchInput.focus());
+        },()=> {
+            this.searchInput.focus()
+            this.funcThrowValue("")
+        });
     }
     handleOnChangeSearch(e){
         const value = e.target.value;
@@ -60,22 +67,34 @@ class SelectSearch extends Component {
         this.setState({
             searchValue:value,
             filteredItems:filteredItems,
-            value:""
-        })
+        },()=>this.funcThrowValue(""))
+    }
+    handleSearchKeyDown(e){
+        if(e.key === "Enter" ){
+            if(this.state.filteredItems.length > 0){
+
+                this.setState({
+                    isDropdownOpen:false,
+                    searchValue:""
+                },()=>{
+                    this.funcThrowValue(this.state.filteredItems[0].value)
+                })
+            }
+        }
     }
     handleItemOnClick(value){
         this.setState({
-            value,
             isDropdownOpen:false,
             searchValue:"",
             filteredItems:this.state.defaultItems
-        })
+        },()=> this.funcThrowValue(value))
     }
     handleSelectChange(value){
-        this.setState({
-            value,
+        this.funcThrowValue(value)
+    }
 
-        })
+    funcThrowValue(value){
+        this.props.onChange(value)
     }
 
     helperIsMobile(){
@@ -91,7 +110,6 @@ class SelectSearch extends Component {
         return value
     }
     helperSortByName(arr){
-
         let result = arr.sort((a,b)=>{
             if(a.name < b.name)
                 return -1
@@ -99,19 +117,12 @@ class SelectSearch extends Component {
                 return 1
             return 0
         })
-
         return result
     }
     helperGetDuration(){
-
         const bounding = this.mainElement.getBoundingClientRect()
 
         const clientHeight = document.body.clientHeight;
-
-        console.log("clientHeight",clientHeight);
-        console.log("clientHeight - bounding.bottom",clientHeight - bounding.bottom);
-        console.log("this.state.maxHeight",this.state.maxHeight);
-
 
         if(
             (clientHeight - bounding.bottom) < this.state.dropdownMaxHeight
@@ -132,7 +143,7 @@ class SelectSearch extends Component {
                         <select
                             className="SelectSearch__select"
                             ref={(select)=>this.select = select}
-                            value={this.state.value}
+                            value={this.props.value}
                             onChange={(e)=>this.handleSelectChange(e.target.value)}
                         >
                             {
@@ -163,9 +174,9 @@ class SelectSearch extends Component {
                         })
                     }>
                         {
-                            this.state.value.length > 0?
+                            this.props.value.length > 0?
                                 this.state.defaultItems.filter((f)=>{
-                                    return( f.value === this.state.value )
+                                    return( f.value === this.props.value )
                                 })[0].name
                             :null
                         }
@@ -174,7 +185,7 @@ class SelectSearch extends Component {
                         classNames({
                             "SelectSearch__placeholder":true,
                             "SelectSearch__placeholder_rolled-up":(
-                                (this.state.isDropdownOpen || this.state.value.length !== 0)
+                                (this.state.isDropdownOpen || this.props.value.length !== 0)
                             ),
                             "SelectSearch__placeholder_hide":(
                                 this.state.isDropdownOpen
@@ -196,6 +207,7 @@ class SelectSearch extends Component {
                         value={this.state.searchValue}
                         ref={(input)=>this.searchInput = input}
                         onChange={(e)=>this.handleOnChangeSearch(e)}
+                        onKeyDown={(e)=>this.handleSearchKeyDown(e)}
                     />
                     <div
                         className={classNames({
@@ -254,11 +266,15 @@ SelectSearch.propTypes = {
             name:PropTypes.string
         })
     ),
-    placeholder:PropTypes.string
+    placeholder:PropTypes.string,
+    value:PropTypes.string,
+    onChange:PropTypes.func
 };
 SelectSearch.defaultProps = {
     items:[],
-    placeholder:"Выберите"
+    placeholder:"Выберите",
+    value:"",
+    onChange:()=>{}
 };
 
 
