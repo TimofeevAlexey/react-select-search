@@ -73,24 +73,24 @@ class SelectSearch extends Component {
         if(e.key === "Enter" ){
             if(this.state.filteredItems.length > 0){
 
-                this.setState({
-                    isDropdownOpen:false,
-                    searchValue:""
-                },()=>{
-                    this.funcThrowValue(this.state.filteredItems[0].value)
-                })
+                this.funcSelectValue(this.state.filteredItems[0].value)
+               
             }
         }
     }
     handleItemOnClick(value){
+        this.funcSelectValue(value)
+    }
+    handleSelectChange(value){
+        this.funcThrowValue(value)
+    }
+
+    funcSelectValue(value){
         this.setState({
             isDropdownOpen:false,
             searchValue:"",
             filteredItems:this.state.defaultItems
         },()=> this.funcThrowValue(value))
-    }
-    handleSelectChange(value){
-        this.funcThrowValue(value)
     }
 
     funcThrowValue(value){
