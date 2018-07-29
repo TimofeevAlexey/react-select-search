@@ -12,13 +12,17 @@ class SelectSearch extends Component {
     constructor(props){
         super(props);
 
+        const items = this.helperSortByName(props.items);
+
         this.state={
             value:"",
             searchValue:"",
-            defaultItems:props.items,
-            filteredItems:props.items,
+            defaultItems:items,
+            filteredItems:items,
             placeholder:props.placeholder,
-            isDropdownOpen:false
+            isDropdownOpen:false,
+            isDurationTop:false,
+            dropdownMaxHeight:235
         }
     }
     static getDerivedStateFromProps(props, state){
@@ -26,7 +30,7 @@ class SelectSearch extends Component {
        if(props.items !== state.defaultItems){
            return{
                ...state,
-               defaultItems:props.items
+               defaultItems:this.helperSortByName(props.items)
            }
        }
 
@@ -40,9 +44,10 @@ class SelectSearch extends Component {
     }
     handleBoxOnClick(e){
 
-
         this.setState({
-            isDropdownOpen:true
+            isDropdownOpen:true,
+            value:"",
+            isDurationTop: this.helperGetDuration()
         },()=> this.searchInput.focus());
     }
     handleOnChangeSearch(e){
@@ -54,7 +59,8 @@ class SelectSearch extends Component {
 
         this.setState({
             searchValue:value,
-            filteredItems:filteredItems
+            filteredItems:filteredItems,
+            value:""
         })
     }
     handleItemOnClick(value){
@@ -63,6 +69,12 @@ class SelectSearch extends Component {
             isDropdownOpen:false,
             searchValue:"",
             filteredItems:this.state.defaultItems
+        })
+    }
+    handleSelectChange(value){
+        this.setState({
+            value,
+
         })
     }
 
@@ -78,15 +90,50 @@ class SelectSearch extends Component {
         }
         return value
     }
+    helperSortByName(arr){
+
+        let result = arr.sort((a,b)=>{
+            if(a.name < b.name)
+                return -1
+            if(a.name > b.name)
+                return 1
+            return 0
+        })
+
+        return result
+    }
+    helperGetDuration(){
+
+        const bounding = this.mainElement.getBoundingClientRect()
+
+        const clientHeight = document.body.clientHeight;
+
+        console.log("clientHeight",clientHeight);
+        console.log("clientHeight - bounding.bottom",clientHeight - bounding.bottom);
+        console.log("this.state.maxHeight",this.state.maxHeight);
+
+
+        if(
+            (clientHeight - bounding.bottom) < this.state.dropdownMaxHeight
+            &&
+            bounding.top > this.state.dropdownMaxHeight
+        ){
+            return true
+        }
+
+        return false
+    }
 
     render() {
         return (
-            <div className="SelectSearch">
+            <div className="SelectSearch" ref={(div)=>this.mainElement = div}>
                 {
                    this.helperIsMobile()?
                         <select
                             className="SelectSearch__select"
                             ref={(select)=>this.select = select}
+                            value={this.state.value}
+                            onChange={(e)=>this.handleSelectChange(e.target.value)}
                         >
                             {
                                 this.state.filteredItems.map((elem)=>{
@@ -102,7 +149,9 @@ class SelectSearch extends Component {
                     className={
                         classNames({
                             "SelectSearch__box":true,
-                            "SelectSearch__box_open":this.state.isDropdownOpen
+                            "SelectSearch__box_open":this.state.isDropdownOpen,
+                            "SelectSearch__box_open_up":this.state.isDropdownOpen && this.state.isDurationTop,
+                            "SelectSearch__box_open_down":this.state.isDropdownOpen &&!this.state.isDurationTop,
                         })
                     }
                     onClick={(e)=>this.handleBoxOnClick(e)}
@@ -124,7 +173,14 @@ class SelectSearch extends Component {
                     <div className={
                         classNames({
                             "SelectSearch__placeholder":true,
-                            "SelectSearch__placeholder_rolled":this.state.isDropdownOpen || this.state.value.length !== 0
+                            "SelectSearch__placeholder_rolled-up":(
+                                (this.state.isDropdownOpen || this.state.value.length !== 0)
+                            ),
+                            "SelectSearch__placeholder_hide":(
+                                this.state.isDropdownOpen
+                                &&
+                                this.state.isDurationTop
+                            )
                         })
                     }>
                         {this.state.placeholder}
@@ -150,7 +206,18 @@ class SelectSearch extends Component {
                 </div>
                 {
                     this.state.isDropdownOpen?
-                        <div className="dropdown SelectSearch__dropdown">
+                        <div
+                            className={
+                                classNames({
+                                    "dropdown SelectSearch__dropdown":true,
+                                    "dropdown_up":this.state.isDurationTop,
+                                    "dropdown_down":!this.state.isDurationTop,
+                                })
+                            }
+                            style={{
+                                maxHeight: this.state.dropdownMaxHeight
+                            }}
+                        >
                             <ul className="dropdown__list">
                                 {
                                     this.state.filteredItems.length === 0?
